@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SGU — Student Grade Viewer</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            background: #1F3864;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .badge {
+            background: #2E75B6;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: #2E75B6;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:nth-child(even) {
+            background: #f7fafc;
+        }
+
+        .grade-a {
+            color: #1E6B3C;
+            font-weight: bold;
+        }
+
+        .grade-b {
+            color: #2E75B6;
+            font-weight: bold;
+        }
+
+        .grade-c {
+            color: #B45309;
+            font-weight: bold;
+        }
+
+        .avg {
+            background: #E8F5E9;
+            border: 1px solid #A5D6A7;
+            padding: 10px 16px;
+            border-radius: 6px;
+            margin-top: 16px;
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h2>Sanjay Ghodawat University</h2>
+
+        <p>
+            DVOps &amp; MLOps Lab &nbsp;
+            <span class="badge">
+                Experiment E3 — Running on AWS EC2
+            </span>
+        </p>
+    </div>
+
+    <h3>Student Grade Report</h3>
+
+    <table>
+        <tr>
+            <th>Roll No.</th>
+            <th>Student Name</th>
+            <th>Marks</th>
+            <th>Grade</th>
+        </tr>
+
+        {% for s in students %}
+        <tr>
+            <td>{{ s.roll }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.marks }}</td>
+            <td class="grade-{{ s.grade[0]|lower }}">
+                {{ s.grade }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div class="avg">
+        Class Average:
+        <strong>{{ avg }}</strong> / 100
+    </div>
+
+</body>
+
+</html>
