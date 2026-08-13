@@ -34,7 +34,13 @@ students = [
         "roll": "A005",
         "marks": 79,
         "grade": "B+"
-    }
+    },
+    {
+        "name": "Guruprasad Bhosale",
+        "roll": "B055",
+        "marks": 90,
+        "grade": "A+"
+    },
 ]
 
 
@@ -67,3 +73,4 @@ if __name__ == "__main__":
         port=5000,
         debug=False
     )
+
