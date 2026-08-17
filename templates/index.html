@@ -1,125 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SGU — Student Grade Viewer</title>
-
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Alpine.js for interactions -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f4f8;
-            margin: 0;
-            padding: 20px;
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-
-        .header {
-            background: #1F3864;
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-        }
-
-        .badge {
-            background: #2E75B6;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            margin-top: 20px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        th {
-            background: #2E75B6;
-            color: white;
-            padding: 12px;
-            text-align: left;
-        }
-
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        tr:nth-child(even) {
-            background: #f7fafc;
-        }
-
-        .grade-a {
-            color: #1E6B3C;
-            font-weight: bold;
-        }
-
-        .grade-b {
-            color: #2E75B6;
-            font-weight: bold;
-        }
-
-        .grade-c {
-            color: #B45309;
-            font-weight: bold;
-        }
-
-        .avg {
-            background: #E8F5E9;
-            border: 1px solid #A5D6A7;
-            padding: 10px 16px;
-            border-radius: 6px;
-            margin-top: 16px;
-            font-size: 15px;
-        }
+        
+        .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .table-scroll::-webkit-scrollbar-track { background: transparent; }
+        .table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
+<body class="bg-gradient-to-br from-blue-50 via-gray-50 to-indigo-50 min-h-screen text-gray-800 p-4 md:p-8">
 
-<body>
-
-    <div class="header">
-        <h2>Sanjay Ghodawat University</h2>
-
-        <p>
-            DVOps &amp; MLOps Lab &nbsp;
-            <span class="badge">
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- SGU Header -->
+        <header class="bg-[#1F3864] text-white p-6 rounded-2xl shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Sanjay Ghodawat University</h1>
+                <p class="text-blue-200 mt-1 font-medium">DVOps & MLOps Lab</p>
+            </div>
+            <div class="mt-4 md:mt-0 bg-[#2E75B6] px-4 py-2 rounded-lg text-sm font-semibold shadow-inner border border-blue-400/50">
                 Experiment E3 — Running on AWS EC2
-            </span>
-        </p>
+            </div>
+        </header>
+
+        <!-- Main 2-Column Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8" x-data="predictionApp()">
+            
+            <!-- Left Column: Prediction Form -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="glass-card rounded-2xl p-6 md:p-8">
+                    <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-[#2E75B6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Predict Performance
+                    </h2>
+                    
+                    <form @submit.prevent="submitPrediction" class="space-y-5">
+                        <!-- Study Hours -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Study Hours (Weekly): <span x-text="form.study_hours_per_week" class="font-bold text-[#2E75B6]"></span></label>
+                            <input type="range" min="0" max="80" step="1" x-model="form.study_hours_per_week" class="w-full accent-[#2E75B6]">
+                        </div>
+
+                        <!-- Attendance -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Attendance %: <span x-text="form.attendance_percentage" class="font-bold text-[#2E75B6]"></span></label>
+                            <input type="range" min="0" max="100" step="1" x-model="form.attendance_percentage" class="w-full accent-[#2E75B6]">
+                        </div>
+
+                        <!-- Internal Score -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Internal Exam Score (0-100)</label>
+                            <input type="number" min="0" max="100" x-model.number="form.internal_exam_score" required 
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#2E75B6] focus:ring-[#2E75B6] sm:text-sm px-4 py-2 border bg-white/50">
+                        </div>
+
+                        <!-- Assignments -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Assignments Completed (0-20)</label>
+                            <input type="number" min="0" max="20" x-model.number="form.assignments_completed" required 
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#2E75B6] focus:ring-[#2E75B6] sm:text-sm px-4 py-2 border bg-white/50">
+                        </div>
+
+                        <button type="submit" :disabled="loading" 
+                            class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-[#2E75B6] hover:bg-[#1F3864] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E75B6] transition-all disabled:opacity-70">
+                            <span x-show="!loading">Run Prediction</span>
+                            <span x-show="loading" class="flex items-center">
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Predicting...
+                            </span>
+                        </button>
+                    </form>
+
+                    <!-- Error Alert -->
+                    <div x-show="error" x-transition class="mt-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm" x-text="error" style="display: none;"></div>
+
+                </div>
+
+                <!-- Prediction Result Card -->
+                <div x-show="result" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+                     class="glass-card rounded-2xl p-6 border-l-4 border-[#2E75B6]" style="display: none;">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Prediction Result</h3>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-3xl font-extrabold text-gray-900" x-text="result?.predicted_marks + ' %'"></p>
+                            <p class="text-sm text-gray-500 mt-1">Expected Final Score</p>
+                        </div>
+                        <div class="h-16 w-16 rounded-full flex items-center justify-center text-2xl font-bold shadow-inner"
+                             :class="{
+                                 'bg-green-100 text-green-700': result?.predicted_grade === 'A',
+                                 'bg-blue-100 text-blue-700': result?.predicted_grade === 'B',
+                                 'bg-yellow-100 text-yellow-700': result?.predicted_grade === 'C',
+                                 'bg-orange-100 text-orange-700': result?.predicted_grade === 'D',
+                                 'bg-red-100 text-red-700': result?.predicted_grade === 'F'
+                             }" x-text="result?.predicted_grade">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Student Data Table -->
+            <div class="lg:col-span-8" x-data="studentTable()">
+                <div class="glass-card rounded-2xl overflow-hidden h-full flex flex-col">
+                    <div class="p-6 border-b border-gray-200/50 flex flex-col md:flex-row justify-between items-start md:items-center bg-white/40 gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">Student Directory</h2>
+                            <div class="text-sm text-[#1E6B3C] font-medium bg-[#E8F5E9] px-3 py-1 rounded-md mt-2 inline-block border border-[#A5D6A7]">
+                                Class Average: {{ avg }} / 100
+                            </div>
+                        </div>
+                        
+                        <!-- Search Box -->
+                        <div class="relative w-full md:w-auto">
+                            <input type="text" x-model="search" placeholder="Search students..." 
+                                class="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E75B6] bg-white/50 w-full md:w-64 transition-all">
+                            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="table-scroll overflow-x-auto overflow-y-auto max-h-[600px] flex-1">
+                        <table class="min-w-full divide-y divide-gray-200/50">
+                            <thead class="bg-gray-50/50 sticky top-0 backdrop-blur-md">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Roll No.</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Student Name</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Marks</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white/20">
+                                {% for s in students %}
+                                <tr class="hover:bg-white/40 transition-colors" x-show="matchesSearch('{{ s.name | lower }}', '{{ s.roll | lower }}')">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-600">{{ s.roll }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded-full bg-[#1F3864] flex items-center justify-center text-white font-bold text-xs">
+                                                {{ s.name[0] }}
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">{{ s.name }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">{{ s.marks }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                            {% if s.grade == 'A' or s.grade == 'A+' %} bg-green-100 text-green-800
+                                            {% elif s.grade == 'B' or s.grade == 'B+' %} bg-blue-100 text-blue-800
+                                            {% elif s.grade == 'C' %} bg-yellow-100 text-yellow-800
+                                            {% elif s.grade == 'D' %} bg-orange-100 text-orange-800
+                                            {% else %} bg-red-100 text-red-800 {% endif %}">
+                                            {{ s.grade }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <h3>Student Grade Report</h3>
+    <script>
+        function predictionApp() {
+            return {
+                form: {
+                    study_hours_per_week: 15,
+                    attendance_percentage: 85,
+                    internal_exam_score: 75,
+                    assignments_completed: 10
+                },
+                loading: false,
+                error: null,
+                result: null,
+                
+                async submitPrediction() {
+                    this.loading = true;
+                    this.error = null;
+                    this.result = null;
+                    
+                    try {
+                        const response = await fetch('/predict', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(this.form)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (!response.ok) {
+                            throw new Error(data.error || 'Something went wrong.');
+                        }
+                        
+                        this.result = data;
+                    } catch (err) {
+                        this.error = err.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
 
-    <table>
-        <tr>
-            <th>Roll No.</th>
-            <th>Student Name</th>
-            <th>Marks</th>
-            <th>Grade</th>
-        </tr>
-
-        {% for s in students %}
-        <tr>
-            <td>{{ s.roll }}</td>
-            <td>{{ s.name }}</td>
-            <td>{{ s.marks }}</td>
-            <td class="grade-{{ s.grade[0]|lower }}">
-                {{ s.grade }}
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <div class="avg">
-        Class Average:
-        <strong>{{ avg }}</strong> / 100
-    </div>
-
+        function studentTable() {
+            return {
+                search: '',
+                matchesSearch(name, roll) {
+                    if (this.search.trim() === '') return true;
+                    const s = this.search.toLowerCase();
+                    return name.includes(s) || roll.includes(s);
+                }
+            }
+        }
+    </script>
 </body>
-
-</html>
+</html>
